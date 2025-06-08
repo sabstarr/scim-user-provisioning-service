@@ -69,7 +69,7 @@ async def root():
     """Root endpoint with application information."""
     return {
         "message": "SCIM 2.0 Endpoints API",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "documentation": "/docs",
         "health": "/admin/health"
     }
