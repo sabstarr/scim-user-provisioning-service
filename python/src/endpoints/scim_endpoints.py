@@ -2,8 +2,8 @@
 SCIM 2.0 Endpoints for user provisioning.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, status, Query, File, UploadFile, Form
+from fastapi.responses import JSONResponse, Response
 from sqlalchemy.orm import Session
 from typing import Optional, List
 import logging
@@ -11,10 +11,11 @@ import logging
 from ..models import get_db
 from ..schemas import (
     SCIMUserCreate, SCIMUserUpdate, SCIMUserResponse, SCIMUserListResponse,
-    ErrorResponse, SuccessResponse
+    ErrorResponse, SuccessResponse, BulkImportResponse, BulkImportRequest
 )
 from ..database_service import DatabaseService
 from ..auth_service import get_current_admin
+from ..bulk_import_service import BulkImportService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -293,3 +294,158 @@ async def get_user_by_email(
     
     user_dict = DatabaseService.user_to_dict(user)
     return SCIMUserResponse(**user_dict)
+
+
+@router.post(
+    "/scim/v2/Realms/{realm_id}/Users/bulk-import",
+    response_model=BulkImportResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["SCIM Bulk Operations"]
+)
+async def bulk_import_users(
+    realm_id: str,
+    file: UploadFile = File(..., description="CSV file containing user data"),
+    dry_run: bool = Form(False, description="Perform validation only without creating users"),
+    skip_duplicates: bool = Form(True, description="Skip users that already exist"),
+    continue_on_error: bool = Form(True, description="Continue processing if individual users fail"),
+    db: Session = Depends(get_db),
+    current_admin: str = Depends(get_current_admin)
+) -> BulkImportResponse:
+    """
+    Bulk import users from CSV file.
+    
+    CSV Format:
+    - Required columns: userName, firstName, surName, email
+    - Optional columns: displayName, secondaryEmail, externalId, active
+    - Maximum file size: 5MB
+    - Maximum users per import: 1000
+    
+    Args:
+        realm_id: Unique realm identifier
+        file: CSV file with user data
+        dry_run: If true, validate only without creating users
+        skip_duplicates: If true, skip users that already exist
+        continue_on_error: If true, continue processing even if some users fail
+        db: Database session
+        current_admin: Authenticated admin username
+    
+    Returns:
+        Detailed import results with success/failure counts and individual user results
+    """
+    logger.info(f"Bulk import requested for realm {realm_id} by admin {current_admin}")
+    
+    # Verify realm exists
+    realm = DatabaseService.get_realm_by_id(db, realm_id)
+    if not realm:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Realm with ID '{realm_id}' not found"
+        )
+    
+    # Create import parameters
+    import_params = BulkImportRequest(
+        dry_run=dry_run,
+        skip_duplicates=skip_duplicates,
+        continue_on_error=continue_on_error
+    )
+    
+    # Process the bulk import
+    try:
+        result = await BulkImportService.process_bulk_import(
+            file=file,
+            realm_id=realm_id,
+            db=db,
+            admin_username=current_admin,
+            params=import_params
+        )
+        
+        logger.info(f"Bulk import completed: {result.successful_imports} successful, "
+                   f"{result.failed_imports} failed, {result.skipped_imports} skipped")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in bulk import: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Bulk import failed: {str(e)}"
+        )
+
+
+@router.get(
+    "/scim/v2/Realms/{realm_id}/Users/bulk-import/template",
+    response_class=Response,
+    tags=["SCIM Bulk Operations"]
+)
+async def download_csv_template(
+    realm_id: str,
+    current_admin: str = Depends(get_current_admin)
+) -> Response:
+    """
+    Download a CSV template for bulk user import.
+    
+    Args:
+        realm_id: Unique realm identifier (for authorization)
+        current_admin: Authenticated admin username
+    
+    Returns:
+        CSV template file with example data and proper headers
+    """
+    logger.info(f"CSV template requested for realm {realm_id} by admin {current_admin}")
+    
+    try:
+        csv_content = BulkImportService.generate_csv_template()
+        
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": "attachment; filename=scim_users_template.csv"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Error generating CSV template: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate CSV template: {str(e)}"
+        )
+
+
+@router.get(
+    "/scim/v2/Realms/{realm_id}/Users/bulk-import/status",
+    response_model=SuccessResponse,
+    tags=["SCIM Bulk Operations"]
+)
+async def get_bulk_import_info(
+    realm_id: str,
+    current_admin: str = Depends(get_current_admin)
+) -> SuccessResponse:
+    """
+    Get information about bulk import capabilities and requirements.
+    
+    Args:
+        realm_id: Unique realm identifier
+        current_admin: Authenticated admin username
+    
+    Returns:
+        Information about bulk import features and limitations
+    """
+    logger.info(f"Bulk import info requested for realm {realm_id} by admin {current_admin}")
+    
+    return SuccessResponse(
+        message="Bulk import service is available",
+        data={
+            "max_file_size_mb": BulkImportService.MAX_FILE_SIZE / (1024 * 1024),
+            "max_users_per_import": BulkImportService.MAX_USERS_PER_IMPORT,
+            "required_columns": BulkImportService.REQUIRED_COLUMNS,
+            "optional_columns": BulkImportService.OPTIONAL_COLUMNS,
+            "supported_file_formats": ["CSV"],
+            "features": {
+                "dry_run": "Validate CSV without creating users",
+                "skip_duplicates": "Skip users that already exist",
+                "continue_on_error": "Continue processing even if some users fail",
+                "detailed_results": "Get detailed success/failure information for each user"
+            }
+        }
+    )

@@ -2,7 +2,7 @@
 SCIM 2.0 Endpoints FastAPI Application
 
 This application provides SCIM 2.0 compliant endpoints for user provisioning
-with support for multiple realms and secure authentication.
+with support for multiple realms, secure authentication, and bulk user import capabilities.
 """
 
 from fastapi import FastAPI, HTTPException, status
@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 # Create FastAPI application
 app = FastAPI(
     title="SCIM 2.0 Endpoints",
-    description="SCIM 2.0 compliant endpoints for user provisioning with multi-realm support",
-    version="1.0.0",
+    description="SCIM 2.0 compliant endpoints for user provisioning with multi-realm support and bulk CSV import",
+    version="1.1.0",  # Updated version for bulk import feature
     docs_url="/docs",
     redoc_url="/redoc"
 )

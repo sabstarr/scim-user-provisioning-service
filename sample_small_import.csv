@@ -1,0 +1,4 @@
+userName,firstName,surName,email,displayName,secondaryEmail,externalId,active
+alice.johnson,Alice,Johnson,alice.johnson@example.com,Alice Johnson,,TEMP001,true
+bob.smith,Bob,Smith,bob.smith@example.com,Robert Smith,bob.personal@gmail.com,TEMP002,false
+charlie.brown,Charlie,Brown,charlie.brown@example.com,,charlie.b@yahoo.com,TEMP003,inactive

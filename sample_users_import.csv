@@ -1,0 +1,21 @@
+userName,firstName,surName,email,displayName,secondaryEmail,externalId,active
+john.doe,John,Doe,john.doe@company.com,John Doe,j.doe@personal.com,EMP001,true
+jane.smith,Jane,Smith,jane.smith@company.com,Jane Smith,,EMP002,true
+mike.johnson,Mike,Johnson,mike.johnson@company.com,Michael Johnson,mike.j@gmail.com,EMP003,1
+sarah.williams,Sarah,Williams,sarah.williams@company.com,Sarah Williams,s.williams@yahoo.com,EMP004,yes
+david.brown,David,Brown,david.brown@company.com,,david.brown@hotmail.com,EMP005,active
+lisa.davis,Lisa,Davis,lisa.davis@company.com,Dr. Lisa Davis,,EMP006,true
+robert.wilson,Robert,Wilson,robert.wilson@company.com,Bob Wilson,bob@personal.email,EMP007,true
+jennifer.garcia,Jennifer,Garcia,jennifer.garcia@company.com,Jenny Garcia,,EMP008,1
+william.martinez,William,Martinez,william.martinez@company.com,Will Martinez,w.martinez@outlook.com,EMP009,yes
+elizabeth.anderson,Elizabeth,Anderson,elizabeth.anderson@company.com,Beth Anderson,,EMP010,true
+james.taylor,James,Taylor,james.taylor@company.com,James Taylor,james.t@gmail.com,EMP011,active
+mary.thomas,Mary,Thomas,mary.thomas@company.com,Mary Thomas,,EMP012,true
+christopher.jackson,Christopher,Jackson,christopher.jackson@company.com,Chris Jackson,c.jackson@yahoo.com,EMP013,true
+patricia.white,Patricia,White,patricia.white@company.com,Pat White,,EMP014,1
+daniel.harris,Daniel,Harris,daniel.harris@company.com,Dan Harris,daniel.h@hotmail.com,EMP015,yes
+linda.martin,Linda,Martin,linda.martin@company.com,Linda Martin,,EMP016,true
+matthew.thompson,Matthew,Thompson,matthew.thompson@company.com,Matt Thompson,matt.t@personal.com,EMP017,active
+barbara.garcia,Barbara,Garcia,barbara.garcia@company.com,Barbara Garcia,,EMP018,true
+anthony.martinez,Anthony,Martinez,anthony.martinez@company.com,Tony Martinez,tony.m@gmail.com,EMP019,1
+susan.robinson,Susan,Robinson,susan.robinson@company.com,Sue Robinson,,EMP020,yes

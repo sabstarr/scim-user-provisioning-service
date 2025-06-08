@@ -8,9 +8,10 @@
 4. [Authentication](#authentication)
 5. [Administrative Endpoints](#administrative-endpoints)
 6. [SCIM User Management Endpoints](#scim-user-management-endpoints)
-7. [API Examples](#api-examples)
-8. [Troubleshooting](#troubleshooting)
-9. [Security Best Practices](#security-best-practices)
+7. [Bulk CSV Import](#bulk-csv-import)
+8. [API Examples](#api-examples)
+9. [Troubleshooting](#troubleshooting)
+10. [Security Best Practices](#security-best-practices)
 
 ---
 
@@ -400,6 +401,307 @@ curl -u admin:admin123 -X DELETE \
 ```
 
 **Response**: HTTP 204 No Content (successful deletion)
+
+---
+
+## Bulk CSV Import
+
+### Overview
+The Bulk CSV Import feature allows administrators to efficiently provision multiple SCIM users in a realm by uploading a CSV file. This enterprise-grade capability streamlines user onboarding for large organizations and supports:
+
+- **Realm-specific imports** - Import users into specific tenant realms
+- **Dry run validation** - Test your CSV file before actual import
+- **Comprehensive error reporting** - Detailed feedback on import issues
+- **Large file support** - Handle hundreds or thousands of user records
+- **Duplicate detection** - Automatic prevention of duplicate usernames
+- **PowerShell automation** - Scripted workflow for enterprise environments
+
+### Quick Start Guide
+
+#### Step 1: Environment Setup (VS Code + Python)
+```powershell
+# Navigate to project directory
+cd c:\codes\python_projects\scim-endpoints-project
+
+# Create virtual environment (if not exists)
+py -3 -m venv venv
+
+# Activate environment in VS Code
+# Use Ctrl+Shift+P -> "Python: Select Interpreter" -> Select ./venv/Scripts/python.exe
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the SCIM server
+cd python
+python start_server.py
+```
+
+#### Step 2: Discover Available Realms
+```bash
+curl -u admin:admin123 http://localhost:8000/admin/realms
+```
+
+**Expected Response**:
+```json
+[
+    {
+        "id": 1,
+        "realm_id": "realm_c308a7df",
+        "name": "SCIM Users Realm",
+        "description": "Default realm for SCIM user provisioning"
+    },
+    {
+        "id": 2,
+        "realm_id": "realm_a3d6898b", 
+        "name": "SCIM IDP Realm",
+        "description": "Default realm for SCIM IDP integration"
+    }
+]
+```
+
+#### Step 3: Get Bulk Import Information
+```bash
+curl -u admin:admin123 \
+  http://localhost:8000/scim/v2/Realms/realm_c308a7df/Users:bulk-info
+```
+
+**Response includes**:
+- CSV format requirements
+- Supported fields and validation rules
+- Import limits and guidelines
+
+#### Step 4: Download CSV Template
+```bash
+curl -u admin:admin123 \
+  http://localhost:8000/scim/v2/Realms/realm_c308a7df/Users:bulk-template \
+  -o bulk_import_template.csv
+```
+
+### CSV File Format Requirements
+
+#### Required Columns
+- `userName`: Unique username (3-50 characters, alphanumeric + underscore/dot)
+- `firstName`: User's first name (1-50 characters)
+- `surName`: User's last name (1-50 characters) 
+- `displayName`: Full display name (1-100 characters)
+- `active`: Account status (`true` or `false`)
+- `emails`: Email addresses (comma-separated, primary email first)
+
+#### Example CSV Structure
+```csv
+userName,firstName,surName,displayName,active,emails
+john.doe,John,Doe,John Doe,true,john.doe@company.com
+jane.smith,Jane,Smith,Jane Smith,true,"jane.smith@company.com,jane.s@company.com"
+bob.wilson,Bob,Wilson,Bob Wilson,false,bob.wilson@company.com
+```
+
+#### Advanced CSV Features
+- **Multiple emails**: Separate with commas, enclose in quotes if needed
+- **Special characters**: Use UTF-8 encoding for international names
+- **Boolean values**: Use `true`/`false`, `1`/`0`, or `yes`/`no`
+- **Empty fields**: Leave blank for optional fields (not recommended)
+
+### Bulk Import Workflow
+
+#### Method 1: Direct API Calls
+
+**Step 1: Dry Run Validation**
+```bash
+curl -u admin:admin123 -X POST \
+  http://localhost:8000/scim/v2/Realms/realm_c308a7df/Users:bulk?dry_run=true \
+  -H "Content-Type: text/csv" \
+  --data-binary @your_import_file.csv
+```
+
+**Step 2: Actual Import**
+```bash
+curl -u admin:admin123 -X POST \
+  http://localhost:8000/scim/v2/Realms/realm_c308a7df/Users:bulk \
+  -H "Content-Type: text/csv" \
+  --data-binary @your_import_file.csv
+```
+
+#### Method 2: PowerShell Automation Script
+
+The project includes `bulk_import_workflow.ps1` for enterprise automation:
+
+```powershell
+# Execute the automated workflow
+.\bulk_import_workflow.ps1
+```
+
+**The script will**:
+1. Discover available realms
+2. Present interactive realm selection
+3. Validate CSV file format
+4. Perform dry run validation
+5. Execute actual import with confirmation
+6. Display detailed results
+
+### API Endpoints Reference
+
+#### 1. Get Bulk Import Information
+```http
+GET /scim/v2/Realms/{realm_id}/Users:bulk-info
+```
+Returns CSV format requirements and import guidelines.
+
+#### 2. Download CSV Template  
+```http
+GET /scim/v2/Realms/{realm_id}/Users:bulk-template
+```
+Downloads a properly formatted CSV template file.
+
+#### 3. Bulk Import Users
+```http
+POST /scim/v2/Realms/{realm_id}/Users:bulk[?dry_run=true]
+Content-Type: text/csv
+```
+
+**Query Parameters**:
+- `dry_run=true` - Validate CSV without creating users
+- `dry_run=false` or omitted - Perform actual import
+
+### Response Format
+
+#### Successful Import Response
+```json
+{
+    "message": "Bulk import completed",
+    "realm_id": "realm_c308a7df",
+    "totalUsers": 3,
+    "successful": 3,
+    "failed": 0,
+    "dry_run": false,
+    "results": [
+        {
+            "userName": "john.doe",
+            "status": "success", 
+            "id": "c40157f5-7405-421b-8a72-6171de4a524b",
+            "message": "User provisioned successfully"
+        },
+        {
+            "userName": "jane.smith",
+            "status": "success",
+            "id": "d51258g6-8516-532c-9b83-7282ef5b625c", 
+            "message": "User provisioned successfully"
+        },
+        {
+            "userName": "bob.wilson",
+            "status": "success",
+            "id": "e62369h7-9627-643d-0c94-8393fg6c736d",
+            "message": "User provisioned successfully"
+        }
+    ]
+}
+```
+
+#### Error Handling Response
+```json
+{
+    "message": "Bulk import completed with errors",
+    "realm_id": "realm_c308a7df", 
+    "totalUsers": 3,
+    "successful": 2,
+    "failed": 1,
+    "dry_run": false,
+    "results": [
+        {
+            "userName": "john.doe",
+            "status": "success",
+            "id": "c40157f5-7405-421b-8a72-6171de4a524b",
+            "message": "User provisioned successfully"
+        },
+        {
+            "userName": "duplicate.user",
+            "status": "error",
+            "message": "Username 'duplicate.user' already exists in realm"
+        },
+        {
+            "userName": "jane.smith", 
+            "status": "success",
+            "id": "d51258g6-8516-532c-9b83-7282ef5b625c",
+            "message": "User provisioned successfully"
+        }
+    ]
+}
+```
+
+### Common Error Scenarios
+
+#### CSV Format Errors
+- **Missing required columns**: Ensure all required fields are present
+- **Invalid email format**: Use valid email addresses (user@domain.com)
+- **Duplicate usernames**: Each username must be unique within the realm
+- **Invalid boolean values**: Use `true`/`false`, `1`/`0`, or `yes`/`no`
+
+#### Data Validation Errors
+- **Username too short/long**: 3-50 characters required
+- **Name fields empty**: firstName and surName cannot be blank
+- **Invalid characters**: Only alphanumeric + underscore/dot for usernames
+
+#### System Errors
+- **Realm not found**: Verify realm_id exists and is accessible
+- **Authentication failed**: Check admin credentials
+- **File too large**: Maximum file size limits may apply
+
+### Best Practices
+
+#### CSV File Preparation
+1. **Use UTF-8 encoding** for international character support
+2. **Validate data locally** before import (check for duplicates, format issues)
+3. **Start with small batches** for initial testing
+4. **Always run dry_run first** to catch issues early
+5. **Keep backup of original data** before processing
+
+#### Enterprise Import Strategy
+1. **Plan realm structure** - Map organizational units to realms
+2. **Batch large imports** - Process in manageable chunks (100-500 users)
+3. **Schedule during maintenance windows** - Minimize impact on operations
+4. **Monitor import progress** - Review detailed results for each batch
+5. **Validate results** - Verify user creation and data accuracy
+
+#### Error Recovery
+1. **Review failed records** - Check error messages for specific issues
+2. **Fix data issues** - Correct CSV file based on error feedback
+3. **Re-import failed records** - Create separate CSV with only failed users
+4. **Verify final state** - List users to confirm successful imports
+
+### Sample CSV Files
+
+The project includes several sample files for testing:
+
+#### `sample_users_import.csv` (20 users)
+Complete enterprise sample with varied data patterns
+
+#### `sample_minimal_import.csv` (3 users)  
+Minimal format with only required fields
+
+#### `sample_small_import.csv` (5 users)
+Mixed active/inactive status examples
+
+### Troubleshooting
+
+#### Import Fails with "Realm not found"
+- **Solution**: Verify realm_id using `/admin/realms` endpoint
+- **Check**: Ensure realm exists and is accessible
+
+#### "Username already exists" errors
+- **Solution**: Use dry_run to identify duplicates before import
+- **Check**: Query existing users: `GET /scim/v2/Realms/{realm_id}/Users`
+
+#### CSV parsing errors
+- **Solution**: Verify CSV format matches template exactly
+- **Check**: Use CSV template from `/Users:bulk-template` endpoint
+
+#### Authentication failures
+- **Solution**: Verify admin credentials (default: admin/admin123)
+- **Check**: Test with health endpoint: `/admin/health`
+
+#### Large file timeouts
+- **Solution**: Split into smaller batches (100-500 users per file)
+- **Check**: Monitor server logs for processing time
 
 ---
 

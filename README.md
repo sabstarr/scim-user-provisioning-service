@@ -6,6 +6,8 @@ A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy,
 
 - **SCIM 2.0 Compliance**: Full implementation of SCIM 2.0 core schema for users
 - **Multi-Realm Support**: Isolated user provisioning across different realms/tenants
+- **Bulk CSV Import**: Enterprise-grade bulk user provisioning with validation and error reporting
+- **PowerShell Automation**: Scripted workflow for automated bulk imports
 - **Secure Authentication**: HTTP Basic Authentication with bcrypt password hashing
 - **RESTful API**: FastAPI-based endpoints with automatic OpenAPI documentation
 - **Database Security**: SQLAlchemy ORM preventing SQL injection attacks
@@ -24,12 +26,19 @@ scim-endpoints-project/
 │   │   ├── schemas.py               # Pydantic validation schemas
 │   │   ├── database_service.py      # Database operations service
 │   │   ├── auth_service.py          # Authentication service
+│   │   ├── bulk_import_service.py   # CSV bulk import service
 │   │   ├── init_db.py              # Database initialization script
 │   │   ├── run_server.py           # Server startup script
 │   │   └── endpoints/
 │   │       ├── __init__.py         # Endpoints module initialization
 │   │       ├── scim_endpoints.py   # SCIM 2.0 user endpoints
 │   │       └── admin_endpoints.py  # Administrative endpoints
+├── bulk_import_workflow.ps1       # PowerShell automation script
+├── sample_users_import.csv        # Sample CSV files for testing
+├── sample_minimal_import.csv       # Minimal format sample
+├── sample_small_import.csv         # Mixed status sample
+├── CSV_IMPORT_GUIDE.md            # Detailed CSV format guide
+├── ADMINISTRATOR_GUIDE.md         # Complete administration guide
 ├── scim_database.db               # SQLite database (auto-created)
 └── README.md                      # This file
 ```
@@ -142,6 +151,20 @@ curl -X GET http://localhost:8000/scim/v2/Realms/{realm_id}/Users \
   -u admin:admin123
 ```
 
+### Bulk Import Users from CSV
+```bash
+# Download CSV template
+curl -u admin:admin123 \
+  http://localhost:8000/scim/v2/Realms/{realm_id}/Users:bulk-template \
+  -o bulk_import_template.csv
+
+# Perform bulk import
+curl -u admin:admin123 -X POST \
+  http://localhost:8000/scim/v2/Realms/{realm_id}/Users:bulk \
+  -H "Content-Type: text/csv" \
+  --data-binary @your_users.csv
+```
+
 ## 🌐 API Endpoints
 
 ### SCIM 2.0 User Management
@@ -153,6 +176,12 @@ curl -X GET http://localhost:8000/scim/v2/Realms/{realm_id}/Users \
 - `DELETE /scim/v2/Realms/{realm_id}/Users/{user_id}` - Delete user
 - `GET /scim/v2/Realms/{realm_id}/Users/by-username/{username}` - Get by username
 - `GET /scim/v2/Realms/{realm_id}/Users/by-email/{email}` - Get by email
+
+### Bulk Import Endpoints
+
+- `POST /scim/v2/Realms/{realm_id}/Users:bulk` - Bulk import users from CSV
+- `GET /scim/v2/Realms/{realm_id}/Users:bulk-info` - Get CSV format requirements
+- `GET /scim/v2/Realms/{realm_id}/Users:bulk-template` - Download CSV template
 
 ### Administrative Endpoints
 
@@ -218,10 +247,24 @@ The API uses HTTP Basic Authentication. Default credentials:
      }'
    ```
 
+4. **Bulk import multiple users**
+   ```bash
+   # Use the automated PowerShell workflow
+   .\bulk_import_workflow.ps1
+   
+   # Or manually with curl
+   curl -X POST "http://localhost:8000/scim/v2/Realms/{realm_id}/Users:bulk" \
+     -u admin:admin123 \
+     -H "Content-Type: text/csv" \
+     --data-binary @sample_users_import.csv
+   ```
+
 ## 📖 API Documentation
 
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+- **Administrator Guide**: See `ADMINISTRATOR_GUIDE.md` for comprehensive bulk import documentation
+- **CSV Import Guide**: See `CSV_IMPORT_GUIDE.md` for detailed CSV format requirements
 
 ## 🛠️ Development
 
@@ -248,6 +291,8 @@ The API uses HTTP Basic Authentication. Default credentials:
 7. ✅ Unique user ID generation with multiple lookup options
 8. ✅ Comprehensive logging and error handling
 9. ✅ Clean project structure with no redundant files
+10. ✅ **Bulk CSV import with validation and error reporting**
+11. ✅ **PowerShell automation workflow for enterprise environments**
 
 ## 🔒 Security Features
 
@@ -273,7 +318,7 @@ The implementation is production-ready with proper error handling, logging, and 
 
 ### Comprehensive Test Suite
 
-The project includes a consolidated, comprehensive test suite that verifies all SCIM 2.0 functionality:
+The project includes multiple test suites that verify all SCIM 2.0 and bulk import functionality:
 
 **`test_scim_api.py`** - Complete SCIM 2.0 API test suite featuring:
 - ✅ **12 Comprehensive Tests** covering all functionality
@@ -283,6 +328,16 @@ The project includes a consolidated, comprehensive test suite that verifies all 
 - 📧 **Email update testing** including single and multiple email scenarios
 - 🔍 User lookup by username and email
 - 🧹 Proper test cleanup and resource management
+
+**`test_bulk_import.py`** - Comprehensive bulk CSV import test suite featuring:
+- ✅ **10 Comprehensive Tests** covering all bulk import scenarios
+- 📋 Realm discovery and selection workflow
+- 📄 CSV template download and validation
+- 🔍 Dry run validation testing
+- 📊 Actual bulk import with multiple users
+- ⚠️ Duplicate detection and error handling
+- 🗂️ Large file processing (hundreds of users)
+- 🧹 Automated user cleanup after testing
 
 ### Test Coverage
 
@@ -303,8 +358,14 @@ The project includes a consolidated, comprehensive test suite that verifies all 
 ### Running Tests
 
 ```powershell
-# Run the complete consolidated test suite
+# Run the complete SCIM API test suite
 python test_scim_api.py
+
+# Run the bulk import test suite  
+python test_bulk_import.py
+
+# Use PowerShell automation for interactive bulk import testing
+.\bulk_import_workflow.ps1
 ```
 
 **Sample Output:**
