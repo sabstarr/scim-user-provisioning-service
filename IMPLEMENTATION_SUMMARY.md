@@ -78,7 +78,9 @@ Successfully built a comprehensive SCIM 2.0 compliant API implementation using F
 ### Infrastructure
 - **Authentication** (`src/auth_service.py`): HTTP Basic Auth implementation
 - **Database Init** (`src/init_db.py`): Database setup and default data creation
-- **Server Runner** (`src/run_server.py`): Application startup and initialization
+- **Server Startup Scripts**: Two options for different use cases
+  - **`start_server.py`**: Production-ready startup with user guidance, no auto-reload
+  - **`src/run_server.py`**: Development startup with auto-reload enabled
 
 ## 🔧 Key Features Implemented
 
@@ -205,8 +207,22 @@ Enterprise automation workflow (`bulk_import_workflow.ps1`) successfully tested:
 ### Server Startup
 ```powershell
 cd python
+# For production/general use (recommended)
 python start_server.py
+
+# For development (auto-reload)
+python -m src.run_server
 ```
+
+**Startup Script Comparison:**
+
+| Feature | `start_server.py` | `run_server.py` |
+|---------|------------------|-----------------|
+| **Target Use** | Production/General | Development |
+| **Auto-reload** | No (stable) | Yes (reload=True) |
+| **User Guidance** | Shows credentials & tips | Minimal output |
+| **Error Handling** | Graceful Ctrl+C handling | Basic exceptions |
+| **Path Setup** | Automatic | Module context |
 
 ### Default Configuration
 - **HTTP Port**: 8000
@@ -253,7 +269,7 @@ scim-endpoints-project/
 ├── sample_small_import.csv           # Mixed status sample
 ├── python/
 │   ├── requirements.txt               # Tested dependency versions
-│   ├── start_server.py               # Simple server startup script
+│   ├── start_server.py               # Production-ready server startup script
 │   ├── test_scim_api.py              # Complete API test suite
 │   ├── test_bulk_import.py           # Bulk import test suite
 │   ├── scim_database.db              # SQLite database (auto-created)
@@ -266,7 +282,7 @@ scim-endpoints-project/
 │       ├── bulk_import_service.py    # CSV processing service
 │       ├── auth_service.py           # Authentication service
 │       ├── init_db.py               # Database initialization
-│       ├── run_server.py            # Advanced server runner
+│       ├── run_server.py            # Development server startup script
 │       ├── __pycache__/             # Python bytecode cache (excluded from git)
 │       └── endpoints/
 │           ├── __init__.py          # Endpoints module
@@ -295,6 +311,34 @@ scim-endpoints-project/
 - `src/database_service.py` - Fixed syntax error in `update_scim_user` method
 - `test_scim_api.py` - Consolidated and expanded test suite (9 → 12 tests)
 - `README.md` - Updated with consolidated testing documentation
+
+### Startup Scripts Implementation:
+**Two distinct startup scripts were implemented to serve different use cases:**
+
+#### `start_server.py` (Production/General Use)
+- **Location**: `python/start_server.py`
+- **Purpose**: User-friendly, production-ready server startup
+- **Key Features**:
+  - Manual path setup via `sys.path` manipulation for import resolution
+  - User-friendly logging with admin credentials display
+  - Graceful Ctrl+C handling with `KeyboardInterrupt` exception
+  - No auto-reload (`reload=False`) for production stability
+  - Clear startup instructions and API endpoint information
+
+#### `src/run_server.py` (Development)
+- **Location**: `python/src/run_server.py`
+- **Purpose**: Development-focused startup with auto-reload capabilities
+- **Key Features**:
+  - Relative imports assuming proper module context
+  - Auto-reload enabled (`reload=True`) for development efficiency
+  - Minimal logging output to reduce console noise
+  - Basic exception handling for development scenarios
+  - Optimized for rapid development cycles with immediate code changes
+
+**Documentation Updates Applied:**
+- `README.md` - Added comprehensive startup scripts comparison section
+- `ADMINISTRATOR_GUIDE.md` - Added detailed usage scenarios and recommendations
+- `IMPLEMENTATION_SUMMARY.md` - Documented technical implementation details
 
 ### Bulk Import Implementation:
 - `src/bulk_import_service.py` - CSV processing and validation service

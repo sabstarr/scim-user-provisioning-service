@@ -20,6 +20,7 @@ A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy,
 scim-endpoints-project/
 ├── python/
 │   ├── requirements.txt              # Python dependencies
+│   ├── start_server.py               # Simple server startup script (production-ready)
 │   ├── src/
 │   │   ├── app.py                   # Main FastAPI application
 │   │   ├── models.py                # SQLAlchemy database models
@@ -28,7 +29,7 @@ scim-endpoints-project/
 │   │   ├── auth_service.py          # Authentication service
 │   │   ├── bulk_import_service.py   # CSV bulk import service
 │   │   ├── init_db.py              # Database initialization script
-│   │   ├── run_server.py           # Server startup script
+│   │   ├── run_server.py           # Development server startup script (auto-reload)
 │   │   └── endpoints/
 │   │       ├── __init__.py         # Endpoints module initialization
 │   │       ├── scim_endpoints.py   # SCIM 2.0 user endpoints
@@ -112,6 +113,60 @@ scim-endpoints-project/
    The server will:
    - Initialize the database with default realms and admin user
    - Start on HTTP port 8000
+
+## 🚀 Starting the Server
+
+### Two Startup Scripts Available
+
+This project provides two startup scripts with different purposes:
+
+#### **start_server.py** (Recommended for Most Users)
+- **Purpose**: Production-ready startup with user-friendly output
+- **Location**: `python/start_server.py`
+- **Features**: 
+  - Shows admin credentials and usage tips
+  - Handles Ctrl+C gracefully
+  - No auto-reload (stable for production)
+  - Path setup handled automatically
+
+**Usage:**
+```powershell
+cd python
+python start_server.py
+```
+
+#### **run_server.py** (For Development)
+- **Purpose**: Development-focused startup with auto-reload
+- **Location**: `python/src/run_server.py`
+- **Features**: 
+  - Auto-reload on code changes (`reload=True`)
+  - Minimal logging output
+  - Designed for module execution
+
+**Usage:**
+```powershell
+# Method 1: From src directory
+cd python/src
+python run_server.py
+
+# Method 2: As a module (from python directory)
+cd python
+python -m src.run_server
+```
+
+### Quick Start Examples
+
+**For first-time setup or production:**
+```powershell
+cd python
+python start_server.py
+```
+
+**For active development:**
+```powershell
+cd python
+python -m src.run_server
+```
 
 ## 🚀 Quick Start
 
@@ -221,6 +276,10 @@ The API uses HTTP Basic Authentication. Default credentials:
 
 1. **Start the server**
    ```powershell
+   # For first-time users or production
+   python start_server.py
+   
+   # For development (with auto-reload)
    python -m src.run_server
    ```
 

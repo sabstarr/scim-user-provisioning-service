@@ -39,15 +39,61 @@ The SCIM 2.0 User Provisioning Service is a comprehensive API for enterprise use
 - Python 3.8 or higher
 - Required dependencies installed (`pip install -r requirements.txt`)
 
-### Starting the Service
+### Two Startup Scripts Available
 
-**Method 1: Simple Startup (Recommended)**
+This project provides two startup scripts with different purposes:
+
+#### **start_server.py** (Recommended for Production/General Use)
+- **Purpose**: Production-ready startup with user guidance
+- **Features**: 
+  - User-friendly logging with admin credentials displayed
+  - Graceful shutdown handling (Ctrl+C)
+  - No auto-reload (stable for production environments)
+  - Automatic path setup for imports
+
+**Usage:**
 ```powershell
 cd c:\codes\python_projects\scim-endpoints-project\python
 python start_server.py
 ```
 
-**Method 2: Advanced Startup**
+#### **run_server.py** (For Development)
+- **Purpose**: Development-focused startup with auto-reload
+- **Features**: 
+  - Auto-reload on code changes (`reload=True`)
+  - Minimal logging output
+  - Designed for active development work
+
+**Usage:**
+```powershell
+# Method 1: From src directory
+cd c:\codes\python_projects\scim-endpoints-project\python\src
+python run_server.py
+
+# Method 2: As a module (from python directory)
+cd c:\codes\python_projects\scim-endpoints-project\python
+python -m src.run_server
+```
+
+### Recommended Usage Scenarios
+
+| Scenario | Use | Script | Reason |
+|----------|-----|--------|--------|
+| **First-time setup** | `start_server.py` | Shows admin credentials and usage tips |
+| **Production deployment** | `start_server.py` | Stable, no auto-reload, better error handling |
+| **Development work** | `run_server.py` | Auto-reload saves time during development |
+| **Code testing** | `run_server.py` | Changes apply immediately without restart |
+| **Demos/Presentations** | `start_server.py` | User-friendly output with clear instructions |
+
+### Starting the Service
+
+**For Production/General Use:**
+```powershell
+cd c:\codes\python_projects\scim-endpoints-project\python
+python start_server.py
+```
+
+**For Development:**
 ```powershell
 cd c:\codes\python_projects\scim-endpoints-project\python
 python -m src.run_server
