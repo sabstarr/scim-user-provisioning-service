@@ -9,6 +9,7 @@ Run from the python directory: python start_server.py
 import logging
 import uvicorn
 import sys
+import signal
 from pathlib import Path
 
 # Add src to Python path
@@ -27,8 +28,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def signal_handler(signum, frame):
+    """Handle shutdown signals gracefully."""
+    logger.info(f"Received signal {signum}. Shutting down gracefully...")
+    sys.exit(0)
+
+
 def main():
     """Main server startup function."""
+    # Set up signal handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     logger.info("Starting SCIM 2.0 Endpoints Server...")
     
     try:
@@ -51,10 +62,11 @@ def main():
             port=8000,
             reload=False,
             log_level="info"
-        )
-        
+        )        
     except KeyboardInterrupt:
-        logger.info("Server stopped by user")
+        logger.info("Server stopped by user (Ctrl+C)")
+    except SystemExit:
+        logger.info("Server stopped gracefully")
     except Exception as e:
         logger.error(f"Failed to start server: {str(e)}")
         raise
