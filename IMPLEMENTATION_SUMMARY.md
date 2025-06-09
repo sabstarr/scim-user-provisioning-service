@@ -2,7 +2,7 @@
 
 ## 🎯 Project Overview
 
-Successfully built a comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy, and SQLite3 for enterprise user provisioning with multi-realm support, secure authentication, and bulk CSV import capabilities.
+Successfully built a comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy, and SQLite3 for user provisioning with multi-realm support, secure authentication, and bulk CSV import capabilities.
 
 ## ✅ Completed Requirements
 
@@ -39,12 +39,12 @@ Successfully built a comprehensive SCIM 2.0 compliant API implementation using F
 - **Session Management**: Proper authentication state handling
 
 ### ✅ 6. Bulk CSV Import System
-- **Enterprise-Grade Bulk Operations**: CSV-based bulk user provisioning
+- **Testing-Grade Bulk Operations**: CSV-based bulk user provisioning
 - **Realm-Specific Imports**: Bulk import scoped to specific realms
 - **Dry-Run Validation**: Pre-import validation without data commitment
 - **Error Handling**: Comprehensive validation with detailed error reporting
 - **Duplicate Detection**: Automatic detection and handling of duplicate users
-- **PowerShell Automation**: Enterprise workflow scripts for automated imports
+- **PowerShell Automation**: Testing workflow scripts for automated imports
 - **Multiple CSV Formats**: Support for minimal and comprehensive CSV formats
 
 ### ✅ 7. Code Quality
@@ -72,14 +72,14 @@ Successfully built a comprehensive SCIM 2.0 compliant API implementation using F
 
 ### Bulk Import System
 - **Bulk Import Service** (`src/bulk_import_service.py`): CSV processing and validation
-- **PowerShell Automation** (`bulk_import_workflow.ps1`): Enterprise workflow scripts
+- **PowerShell Automation** (`bulk_import_workflow.ps1`): Testing workflow scripts
 - **Sample CSV Files**: Multiple test and example CSV files
 
 ### Infrastructure
 - **Authentication** (`src/auth_service.py`): HTTP Basic Auth implementation
 - **Database Init** (`src/init_db.py`): Database setup and default data creation
 - **Server Startup Scripts**: Two options for different use cases
-  - **`start_server.py`**: Production-ready startup with user guidance, no auto-reload
+  - **`start_server.py`**: Testing-ready startup with user guidance, no auto-reload
   - **`src/run_server.py`**: Development startup with auto-reload enabled
 
 ## 🔧 Key Features Implemented
@@ -122,7 +122,7 @@ POST /scim/v2/Realms/{realm_id}/bulk-import
 - **Dry-Run Mode**: Validation without data commitment (`dry_run=true`)
 - **Duplicate Handling**: Automatic detection of existing users
 - **Error Reporting**: Detailed validation errors with line numbers
-- **PowerShell Integration**: Automated workflow scripts for enterprise use
+- **PowerShell Integration**: Automated workflow scripts for testing use
 - **Template Generation**: Dynamic CSV templates based on realm requirements
 
 ### 6. Unique Identifiers
@@ -186,7 +186,7 @@ Comprehensive bulk import test suite (`test_bulk_import.py`) with **10 tests** c
 ✅ **Test 10**: User Cleanup - Bulk user removal
 
 ### PowerShell Workflow Testing
-Enterprise automation workflow (`bulk_import_workflow.ps1`) successfully tested:
+Testing automation workflow (`bulk_import_workflow.ps1`) successfully tested:
 
 ✅ **Realm Discovery**: Automatic realm enumeration and selection
 ✅ **Interactive Selection**: User-friendly realm selection interface
@@ -218,7 +218,7 @@ python -m src.run_server
 
 | Feature | `start_server.py` | `run_server.py` |
 |---------|------------------|-----------------|
-| **Target Use** | Production/General | Development |
+| **Target Use** | Testing/General | Development |
 | **Auto-reload** | No (stable) | Yes (reload=True) |
 | **User Guidance** | Shows credentials & tips | Minimal output |
 | **Error Handling** | Graceful Ctrl+C handling | Basic exceptions |
@@ -230,11 +230,11 @@ python -m src.run_server
 - **Database**: `scim_database.db` (auto-created)
 - **API Documentation**: `http://localhost:8000/docs`
 
-### Production Considerations
-1. **Change Default Password**: Update admin credentials
-2. **Use Production Database**: Replace SQLite with PostgreSQL/MySQL
+### Testing Considerations
+1. **Change Default Password**: Update admin credentials for sensitive testing
+2. **Use Alternative Database**: Replace SQLite with PostgreSQL/MySQL for advanced testing
 3. **Environment Variables**: Externalize configuration
-4. **Logging**: Configure production logging levels
+4. **Logging**: Configure appropriate logging levels
 5. **Monitoring**: Add health check endpoints and metrics
 
 ### Development Environment
@@ -261,15 +261,15 @@ scim-endpoints-project/
 ├── .gitignore                        # Git ignore rules for Python/FastAPI projects
 ├── README.md                          # Comprehensive documentation
 ├── IMPLEMENTATION_SUMMARY.md          # Technical implementation summary
-├── ADMINISTRATOR_GUIDE.md             # Enterprise administration guide
+├── ADMINISTRATOR_GUIDE.md             # Testing administration guide
 ├── CSV_IMPORT_GUIDE.md               # Bulk import documentation
 ├── bulk_import_workflow.ps1          # PowerShell automation script
-├── sample_users_import.csv           # 20-user enterprise sample
+├── sample_users_import.csv           # 20-user testing sample
 ├── sample_minimal_import.csv         # Minimal format sample
 ├── sample_small_import.csv           # Mixed status sample
 ├── python/
 │   ├── requirements.txt               # Tested dependency versions
-│   ├── start_server.py               # Production-ready server startup script
+│   ├── start_server.py               # Testing-ready server startup script
 │   ├── test_scim_api.py              # Complete API test suite
 │   ├── test_bulk_import.py           # Bulk import test suite
 │   ├── scim_database.db              # SQLite database (auto-created)
@@ -294,8 +294,8 @@ scim-endpoints-project/
 ## 🎉 Project Success Metrics
 
 - **✅ SCIM 2.0 Compliance**: Full RFC 7643 implementation
-- **✅ Bulk CSV Import**: Enterprise-grade bulk user provisioning
-- **✅ PowerShell Automation**: Automated workflow scripts for enterprise environments
+- **✅ Bulk CSV Import**: Testing-grade bulk user provisioning
+- **✅ PowerShell Automation**: Automated workflow scripts for testing environments
 - **✅ Security**: Multiple layers of protection implemented
 - **✅ Performance**: Efficient database operations with ORM
 - **✅ Maintainability**: Clean, well-documented, type-safe code
@@ -315,14 +315,14 @@ scim-endpoints-project/
 ### Startup Scripts Implementation:
 **Two distinct startup scripts were implemented to serve different use cases:**
 
-#### `start_server.py` (Production/General Use)
+#### `start_server.py` (Testing/General Use)
 - **Location**: `python/start_server.py`
-- **Purpose**: User-friendly, production-ready server startup
+- **Purpose**: User-friendly, testing-ready server startup
 - **Key Features**:
   - Manual path setup via `sys.path` manipulation for import resolution
   - User-friendly logging with admin credentials display
   - Graceful Ctrl+C handling with `KeyboardInterrupt` exception
-  - No auto-reload (`reload=False`) for production stability
+  - No auto-reload (`reload=False`) for testing stability
   - Clear startup instructions and API endpoint information
 
 #### `src/run_server.py` (Development)
@@ -343,7 +343,7 @@ scim-endpoints-project/
 ### Bulk Import Implementation:
 - `src/bulk_import_service.py` - CSV processing and validation service
 - `src/endpoints/scim_endpoints.py` - Added 3 bulk import API endpoints
-- `bulk_import_workflow.ps1` - PowerShell enterprise automation script
+- `bulk_import_workflow.ps1` - PowerShell testing automation script
 - `test_bulk_import.py` - Comprehensive bulk import test suite (10 tests)
 - `sample_*_import.csv` - Multiple CSV sample files for testing
 - `ADMINISTRATOR_GUIDE.md` - Added comprehensive bulk import documentation section
@@ -353,4 +353,4 @@ scim-endpoints-project/
 - `test_email_updates.py` - Removed (merged into main test suite)
 - `test_scim_api_backup.py` - Removed (backup no longer needed)
 
-This implementation provides a production-ready foundation for enterprise SCIM user provisioning with comprehensive bulk import capabilities, PowerShell automation, and the flexibility to extend for additional SCIM resources and custom requirements. **All functionality is fully tested and operational**, including individual user management, email updates, and enterprise-grade bulk CSV import with comprehensive validation and error handling.
+This implementation provides a testing-ready foundation for SCIM user provisioning with comprehensive bulk import capabilities, PowerShell automation, and the flexibility to extend for additional SCIM resources and custom requirements. **All functionality is fully tested and operational**, including individual user management, email updates, and testing-grade bulk CSV import with comprehensive validation and error handling.

@@ -17,7 +17,7 @@
 
 ## Service Overview
 
-The SCIM 2.0 User Provisioning Service is a comprehensive API for enterprise user management that supports:
+The SCIM 2.0 User Provisioning Service is a comprehensive API for user management that supports:
 
 - **Multi-tenant architecture** with realm-based user isolation
 - **SCIM 2.0 compliance** for industry-standard user provisioning
@@ -28,7 +28,7 @@ The SCIM 2.0 User Provisioning Service is a comprehensive API for enterprise use
 ### Key Components
 - **FastAPI Application**: Modern Python web framework
 - **SQLite Database**: Lightweight, file-based storage
-- **Multi-Realm Support**: Tenant isolation for enterprise environments
+- **Multi-Realm Support**: Tenant isolation for multi-tenant testing environments
 - **HTTP Basic Authentication**: Simple, secure API access
 
 ---
@@ -43,12 +43,12 @@ The SCIM 2.0 User Provisioning Service is a comprehensive API for enterprise use
 
 This project provides two startup scripts with different purposes:
 
-#### **start_server.py** (Recommended for Production/General Use)
-- **Purpose**: Production-ready startup with user guidance
+#### **start_server.py** (Recommended for General Use)
+- **Purpose**: Simple startup with user guidance
 - **Features**: 
   - User-friendly logging with admin credentials displayed
   - Graceful shutdown handling (Ctrl+C)
-  - No auto-reload (stable for production environments)
+  - No auto-reload (stable for testing environments)
   - Automatic path setup for imports
 
 **Usage:**
@@ -80,14 +80,14 @@ python -m src.run_server
 | Scenario | Use | Script | Reason |
 |----------|-----|--------|--------|
 | **First-time setup** | `start_server.py` | Shows admin credentials and usage tips |
-| **Production deployment** | `start_server.py` | Stable, no auto-reload, better error handling |
+| **Testing/Demo** | `start_server.py` | Stable, no auto-reload, better error handling |
 | **Development work** | `run_server.py` | Auto-reload saves time during development |
 | **Code testing** | `run_server.py` | Changes apply immediately without restart |
 | **Demos/Presentations** | `start_server.py` | User-friendly output with clear instructions |
 
 ### Starting the Service
 
-**For Production/General Use:**
+**For General Use/Testing:**
 ```powershell
 cd c:\codes\python_projects\scim-endpoints-project\python
 python start_server.py
@@ -120,7 +120,10 @@ INFO: Uvicorn running on http://0.0.0.0:8000
 
 ### Stopping the Service
 - **Windows**: Press `Ctrl+C` in the terminal
-- **PowerShell**: Use `Stop-Process` if running as background service
+- **PowerShell Force Stop**: Use this command if the server is unresponsive:
+```powershell
+powershell -Command "Get-Process | Where-Object { \`$_.ProcessName -eq 'python' } | Stop-Process -Force; Write-Host 'Server shutdown completed.'"
+```
 
 ### Service Health Check
 ```bash
@@ -138,12 +141,51 @@ Expected Response:
 }
 ```
 
+### Quick Database Reset
+
+**When you need to start fresh** (corrupted data, testing reset, or development cleanup):
+
+#### Method 1: Simple Reset
+```powershell
+# 1. Stop the server (Ctrl+C if running)
+# 2. Navigate to python directory
+cd c:\codes\python_projects\scim-endpoints-project\python
+
+# 3. Delete the database file
+Remove-Item "scim_database.db"
+
+# 4. Restart the server (auto-recreates with defaults)
+python start_server.py
+```
+
+#### Method 2: One-liner Reset
+```powershell
+# Server must be stopped first, then:
+cd c:\codes\python_projects\scim-endpoints-project\python; Remove-Item "scim_database.db" -ErrorAction SilentlyContinue; python start_server.py
+```
+
+#### What Database Reset Does:
+- ✅ Removes all users from all realms
+- ✅ Removes all custom realms
+- ✅ Removes all admin users
+- ✅ Next server start creates fresh database
+- ✅ Restores default realms (`realm_c308a7df`, `realm_a3d6898b`)
+- ✅ Restores default admin credentials (`admin/admin123`)
+- ✅ Perfect for development testing and cleanup
+
+#### When to Use Quick Reset:
+- **Testing scenarios**: Clean slate for each test run
+- **Development work**: Remove test data and start fresh
+- **Import errors**: Clean up after failed bulk imports
+- **Database corruption**: Fix database issues
+- **Demo preparation**: Ensure clean demo environment
+
 ---
 
 ## Understanding Realms
 
 ### What is a Realm?
-A **realm** is a logical tenant space that provides complete user isolation in multi-tenant environments. Each realm:
+A **realm** is a logical tenant space that provides complete user isolation in multi-tenant testing environments. Each realm:
 - Contains its own set of users
 - Has a unique identifier (e.g., `realm_c308a7df`)
 - Provides complete data isolation between tenants
@@ -167,7 +209,7 @@ The service creates two default realms:
 
 ### Selecting the Appropriate Realm
 
-**For Production Environments:**
+**For Testing Environments:**
 - Use dedicated realms per customer/tenant
 - Create descriptive realm names for easy identification
 - Document realm purposes and ownership
@@ -453,14 +495,14 @@ curl -u admin:admin123 -X DELETE \
 ## Bulk CSV Import
 
 ### Overview
-The Bulk CSV Import feature allows administrators to efficiently provision multiple SCIM users in a realm by uploading a CSV file. This enterprise-grade capability streamlines user onboarding for large organizations and supports:
+The Bulk CSV Import feature allows administrators to efficiently provision multiple SCIM users in a realm by uploading a CSV file. This testing-grade capability streamlines user onboarding for organizations and supports:
 
 - **Realm-specific imports** - Import users into specific tenant realms
 - **Dry run validation** - Test your CSV file before actual import
 - **Comprehensive error reporting** - Detailed feedback on import issues
 - **Large file support** - Handle hundreds or thousands of user records
 - **Duplicate detection** - Automatic prevention of duplicate usernames
-- **PowerShell automation** - Scripted workflow for enterprise environments
+- **PowerShell automation** - Scripted workflow for testing environments
 
 ### Quick Start Guide
 
@@ -570,7 +612,7 @@ curl -u admin:admin123 -X POST \
 
 #### Method 2: PowerShell Automation Script
 
-The project includes `bulk_import_workflow.ps1` for enterprise automation:
+The project includes `bulk_import_workflow.ps1` for testing automation:
 
 ```powershell
 # Execute the automated workflow
@@ -701,7 +743,7 @@ Content-Type: text/csv
 4. **Always run dry_run first** to catch issues early
 5. **Keep backup of original data** before processing
 
-#### Enterprise Import Strategy
+#### Testing Import Strategy
 1. **Plan realm structure** - Map organizational units to realms
 2. **Batch large imports** - Process in manageable chunks (100-500 users)
 3. **Schedule during maintenance windows** - Minimize impact on operations
@@ -719,7 +761,7 @@ Content-Type: text/csv
 The project includes several sample files for testing:
 
 #### `sample_users_import.csv` (20 users)
-Complete enterprise sample with varied data patterns
+Complete testing sample with varied data patterns
 
 #### `sample_minimal_import.csv` (3 users)  
 Minimal format with only required fields
@@ -936,7 +978,7 @@ curl -u admin:admin123 http://localhost:8000/admin/health
 ## Security Best Practices
 
 ### 1. Authentication Security
-- **Change Default Credentials**: Never use `admin:admin123` in production
+- **Change Default Credentials**: Never use `admin:admin123` in testing with sensitive data
 - **Strong Passwords**: Use complex passwords for admin accounts
 - **Regular Rotation**: Change passwords periodically
 - **Limited Access**: Only provide access to authorized personnel
@@ -944,8 +986,8 @@ curl -u admin:admin123 http://localhost:8000/admin/health
 ### 2. Network Security
 - **Firewall Rules**: Restrict access to port 8000
 - **VPN Access**: Require VPN for remote access
-- **Load Balancer**: Use reverse proxy for production deployments
-- **SSL/TLS**: Consider adding HTTPS for production (currently HTTP-only)
+- **Load Balancer**: Use reverse proxy for advanced deployments
+- **SSL/TLS**: Consider adding HTTPS for sensitive data testing (currently HTTP-only)
 
 ### 3. Data Protection
 - **Database Backups**: Regular backups of `scim_database.db`
@@ -960,7 +1002,7 @@ curl -u admin:admin123 http://localhost:8000/admin/health
 - **Backup Strategy**: Implement regular database backups
 
 ### 5. API Security
-- **Rate Limiting**: Implement API rate limiting for production
+- **Rate Limiting**: Implement API rate limiting for extended testing
 - **Input Validation**: All inputs are validated by Pydantic schemas
 - **SQL Injection Protection**: SQLAlchemy ORM prevents SQL injection
 - **Error Handling**: Proper error responses without sensitive information

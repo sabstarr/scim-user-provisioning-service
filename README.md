@@ -1,12 +1,12 @@
 # SCIM 2.0 Endpoints Project
 
-A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy, and SQLite3 for enterprise user provisioning with multi-realm support and secure authentication.
+A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy, and SQLite3 for user provisioning with multi-realm support and secure authentication.
 
 ## 🚀 Features
 
 - **SCIM 2.0 Compliance**: Full implementation of SCIM 2.0 core schema for users
 - **Multi-Realm Support**: Isolated user provisioning across different realms/tenants
-- **Bulk CSV Import**: Enterprise-grade bulk user provisioning with validation and error reporting
+- **Bulk CSV Import**: Testing-grade bulk user provisioning with validation and error reporting
 - **PowerShell Automation**: Scripted workflow for automated bulk imports
 - **Secure Authentication**: HTTP Basic Authentication with bcrypt password hashing
 - **RESTful API**: FastAPI-based endpoints with automatic OpenAPI documentation
@@ -20,7 +20,7 @@ A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy,
 scim-endpoints-project/
 ├── python/
 │   ├── requirements.txt              # Python dependencies
-│   ├── start_server.py               # Simple server startup script (production-ready)
+│   ├── start_server.py               # Simple server startup script (stable)
 │   ├── src/
 │   │   ├── app.py                   # Main FastAPI application
 │   │   ├── models.py                # SQLAlchemy database models
@@ -121,12 +121,12 @@ scim-endpoints-project/
 This project provides two startup scripts with different purposes:
 
 #### **start_server.py** (Recommended for Most Users)
-- **Purpose**: Production-ready startup with user-friendly output
+- **Purpose**: Simple startup with user-friendly output
 - **Location**: `python/start_server.py`
 - **Features**: 
   - Shows admin credentials and usage tips
   - Handles Ctrl+C gracefully
-  - No auto-reload (stable for production)
+  - No auto-reload (stable for testing)
   - Path setup handled automatically
 
 **Usage:**
@@ -156,7 +156,7 @@ python -m src.run_server
 
 ### Quick Start Examples
 
-**For first-time setup or production:**
+**For first-time setup or general use:**
 ```powershell
 cd python
 python start_server.py
@@ -166,6 +166,32 @@ python start_server.py
 ```powershell
 cd python
 python -m src.run_server
+```
+
+## 🔄 Quick Database Reset
+
+**When you need to start fresh** (corrupted data, testing, or development reset):
+
+```powershell
+# 1. Stop the server (Ctrl+C if running)
+# 2. Delete the database file
+cd python
+Remove-Item "scim_database.db"
+
+# 3. Restart the server (auto-recreates with defaults)
+python start_server.py
+```
+
+**What this does:**
+- Removes all users, realms, and admin data
+- Next server start creates fresh database with default realms
+- Restores default admin credentials (`admin/admin123`)
+- Perfect for development testing and cleanup
+
+**Alternative method:**
+```powershell
+# One-liner reset (server must be stopped first)
+cd python; Remove-Item "scim_database.db" -ErrorAction SilentlyContinue; python start_server.py
 ```
 
 ## 🚀 Quick Start
@@ -351,7 +377,7 @@ The API uses HTTP Basic Authentication. Default credentials:
 8. ✅ Comprehensive logging and error handling
 9. ✅ Clean project structure with no redundant files
 10. ✅ **Bulk CSV import with validation and error reporting**
-11. ✅ **PowerShell automation workflow for enterprise environments**
+11. ✅ **PowerShell automation workflow for testing environments**
 
 ## 🔒 Security Features
 
@@ -362,7 +388,7 @@ The API uses HTTP Basic Authentication. Default credentials:
 
 ## 📝 Work Summary
 
-This project implements a complete SCIM 2.0 compliant API following Microsoft's enterprise provisioning standards. Key accomplishments:
+This project implements a complete SCIM 2.0 compliant API following modern provisioning standards. Key accomplishments:
 
 - Built a robust multi-tenant architecture with realm isolation
 - Implemented comprehensive SCIM 2.0 user management capabilities
@@ -371,7 +397,7 @@ This project implements a complete SCIM 2.0 compliant API following Microsoft's 
 - Established proper database design with SQLAlchemy ORM
 - Provided extensive API documentation and developer tools
 
-The implementation is production-ready with proper error handling, logging, and security measures in place.
+The implementation is stable for testing with proper error handling, logging, and security measures in place.
 
 ## 🧪 Testing
 
