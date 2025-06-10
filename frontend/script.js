@@ -208,17 +208,19 @@ class SCIMDashboard {
     async makeRequest(endpoint, options = {}) {
         if (!this.credentials) {
             throw new Error('Not authenticated');
-        }
-
-        const url = `${this.baseUrl}${endpoint}`;
+        }        const url = `${this.baseUrl}${endpoint}`;
         const config = {
             headers: {
                 'Authorization': `Basic ${this.credentials}`,
-                'Content-Type': 'application/json',
                 ...options.headers
             },
             ...options
         };
+
+        // Only set Content-Type for non-FormData requests
+        if (!(config.body instanceof FormData)) {
+            config.headers['Content-Type'] = 'application/json';
+        }
 
         // Input sanitization for JSON data
         if (config.body && typeof config.body === 'string') {
@@ -849,7 +851,6 @@ class SCIMDashboard {
         // Enable import button
         document.getElementById('performBulkImport').disabled = false;
     }    async downloadTemplate() {
-        console.log('Download template called, currentRealm:', this.currentRealm);
         if (!this.currentRealm) {
             this.showToast('No Realm', 'Please select a realm first', 'warning');
             return;
@@ -876,12 +877,10 @@ class SCIMDashboard {
                 throw new Error('Failed to download template');
             }
         } catch (error) {
-            this.showToast('Error', error.message, 'error');
-        } finally {
+            this.showToast('Error', error.message, 'error');        } finally {
             this.hideLoading();
         }
     }    async performBulkImport() {
-        console.log('Bulk import called, currentRealm:', this.currentRealm);
         if (!this.currentRealm) {
             this.showToast('No Realm', 'Please select a realm first', 'warning');
             return;
@@ -893,10 +892,10 @@ class SCIMDashboard {
         if (!file) {
             this.showToast('No File', 'Please select a CSV file first', 'error');
             return;
-        }
+        }        const dryRun = document.getElementById('dryRun').checked;
+        this.showLoading(dryRun ? 'Validating CSV file...' : 'Importing users...');
 
-        const dryRun = document.getElementById('dryRun').checked;
-        this.showLoading(dryRun ? 'Validating CSV file...' : 'Importing users...');try {
+        try {
             const endpoint = `/scim/v2/Realms/${this.currentRealm}/Users/bulk-import`;
             
             // Create FormData for file upload
