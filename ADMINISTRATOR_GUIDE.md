@@ -330,6 +330,31 @@ curl -u admin:admin123 -X POST http://localhost:8000/admin/users \
   }'
 ```
 
+### 6. Change Password
+**Endpoint**: `PUT /admin/change-password`
+**Purpose**: Change current admin user's password
+
+```bash
+curl -u admin:admin123 -X PUT http://localhost:8000/admin/change-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "current_password": "admin123",
+    "new_password": "new_secure_password_456",
+    "confirm_password": "new_secure_password_456"
+  }'
+```
+
+**Response**:
+```json
+{
+    "message": "Password changed successfully",
+    "data": {
+        "admin": "admin",
+        "timestamp": "2025-06-10T15:30:45"
+    }
+}
+```
+
 ---
 
 ## SCIM User Management Endpoints

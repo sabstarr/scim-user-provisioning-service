@@ -5,12 +5,14 @@ Admin endpoints for realm and user management.
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from datetime import datetime
 import logging
+from datetime import datetime
 
 from ..models import get_db
 from ..schemas import (
     RealmCreate, RealmResponse, AdminUserCreate, AdminUserResponse,
-    SuccessResponse
+    AdminPasswordChange, SuccessResponse
 )
 from ..database_service import DatabaseService
 from ..auth_service import get_current_admin
@@ -182,3 +184,66 @@ async def health_check(
         message="SCIM endpoints are healthy",
         data={"admin": current_admin, "status": "active"}
     )
+
+
+@router.put(
+    "/admin/change-password",
+    response_model=SuccessResponse,
+    tags=["Admin - Users"]
+)
+async def change_admin_password(
+    password_data: AdminPasswordChange,
+    db: Session = Depends(get_db),
+    current_admin: str = Depends(get_current_admin)
+) -> SuccessResponse:
+    """
+    Change current admin user's password.
+    
+    Args:
+        password_data: Password change data with current and new passwords
+        db: Database session
+        current_admin: Authenticated admin username
+    
+    Returns:
+        Success response
+    """
+    logger.info(f"Password change request by admin {current_admin}")
+    
+    try:
+        # Get current admin user
+        admin_user = DatabaseService.get_admin_user(db, current_admin)
+        if not admin_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Admin user not found"
+            )
+        
+        # Verify current password
+        if not DatabaseService.verify_admin_password(password_data.current_password, admin_user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Current password is incorrect"
+            )
+        
+        # Update password
+        success = DatabaseService.update_admin_password(db, current_admin, password_data.new_password)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update password"
+            )
+        
+        logger.info(f"Password successfully changed for admin {current_admin}")
+        return SuccessResponse(
+            message="Password changed successfully",
+            data={"admin": current_admin, "timestamp": datetime.utcnow().isoformat()}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error changing password for admin {current_admin}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )

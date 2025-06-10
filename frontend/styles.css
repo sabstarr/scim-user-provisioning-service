@@ -233,17 +233,24 @@ body {
 /* Forms */
 .form {
   max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .form-group {
   margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-group label {
   display: block;
   margin-bottom: var(--spacing-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: 500;
   color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 .form-group input,
@@ -280,6 +287,19 @@ body {
   background-position: right var(--spacing-md) center;
   background-size: 16px;
   padding-right: calc(var(--spacing-md) * 3);
+}
+
+/* Password change form specific styling */
+#changePasswordForm {
+    border: 2px solid var(--warning-color);
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--card-bg);
+}
+
+#changePasswordForm .form-group label {
+    color: var(--warning-color);
+    font-weight: 600;
 }
 
 /* Buttons */

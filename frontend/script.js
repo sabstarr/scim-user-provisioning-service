@@ -46,6 +46,10 @@ class SCIMDashboard {
 
     // Event Listeners
     bindEventListeners() {
+        // Bind admin form events
+        document.getElementById('createAdminForm').addEventListener('submit', (e) => this.createAdmin(e));
+        document.getElementById('changePasswordForm').addEventListener('submit', (e) => this.changePassword(e));
+        
         // Theme toggle
         document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
 
@@ -974,6 +978,60 @@ class SCIMDashboard {
             } else {
                 const error = await response.json();
                 throw new Error(error.detail || 'Failed to create admin user');
+            }
+        } catch (error) {
+            this.showToast('Error', error.message, 'error');
+        } finally {
+            this.hideLoading();
+        }
+    }
+
+    async changePassword(e) {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            this.showToast('Invalid Input', 'Please fill in all fields', 'error');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            this.showToast('Password Mismatch', 'New password and confirmation do not match', 'error');
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            this.showToast('Invalid Password', 'Password must be at least 8 characters long', 'error');
+            return;
+        }
+
+        this.showLoading('Changing password...');
+
+        try {
+            const response = await this.makeRequest('/admin/change-password', {
+                method: 'PUT',
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.showToast('Success', 'Password changed successfully', 'success');
+                document.getElementById('changePasswordForm').reset();
+                
+                // Show notification that they need to use new password
+                setTimeout(() => {
+                    this.showToast('Important', 'Please use your new password for future logins', 'info');
+                }, 2000);
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to change password');
             }
         } catch (error) {
             this.showToast('Error', error.message, 'error');

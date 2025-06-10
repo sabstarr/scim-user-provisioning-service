@@ -117,6 +117,20 @@ class AdminUserCreate(BaseModel):
     email: EmailStr = Field(..., description="Email address")
 
 
+class AdminPasswordChange(BaseModel):
+    """Schema for changing admin password."""
+    current_password: str = Field(..., description="Current password")
+    new_password: str = Field(..., min_length=8, description="New password (minimum 8 characters)")
+    confirm_password: str = Field(..., description="Confirm new password")
+
+    @validator('confirm_password')
+    def passwords_match(cls, v, values):
+        """Validate that new password and confirmation match."""
+        if 'new_password' in values and v != values['new_password']:
+            raise ValueError('New password and confirmation do not match')
+        return v
+
+
 class AdminUserResponse(BaseModel):
     """Schema for admin user response."""
     id: int = Field(..., description="User ID")

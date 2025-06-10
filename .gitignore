@@ -164,6 +164,9 @@ test_output_*.csv
 test_import_*.csv
 bulk_import_template.csv
 *_backup.csv
+frontend_demo*.py
+frontend_browser_test.py
+*_test.py
 
 # PowerShell execution policy files
 *.ps1.zone.*

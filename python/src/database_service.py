@@ -217,6 +217,21 @@ class DatabaseService:
         return pwd_context.verify(password, hashed_password)
 
     @staticmethod
+    def update_admin_password(db: Session, username: str, new_password: str) -> bool:
+        """Update admin user password."""
+        admin_user = DatabaseService.get_admin_user(db, username)
+        if not admin_user:
+            return False
+        
+        # Hash the new password
+        hashed_password = pwd_context.hash(new_password)
+        admin_user.password_hash = hashed_password
+        
+        db.commit()
+        db.refresh(admin_user)
+        return True
+
+    @staticmethod
     def user_to_dict(user: SCIMUser) -> Dict[str, Any]:
         """Convert SCIMUser to dictionary for response."""
         return {
