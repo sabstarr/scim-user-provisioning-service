@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCIM 2.0 User Provisioning Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzdCMjQxQyIvPgo8cGF0aCBkPSJNOSAxNkg5LjVIMTBWMTZIOUM5IDEzLjUgMTEgMTEgMTMuNSAxMUMxNiAxMSAxOCAxMy41IDE4IDE2UzE2IDIxIDEzLjUgMjFDMTEgMjEgOSAxOC41IDkgMTZaTTEzLjUgMTNDMTIuMTIgMTMgMTEgMTQuMTIgMTEgMTUuNUMxMSAxNi44OCAxMi4xMiAxOCAxMy41IDE4UzE2IDE2Ljg4IDE2IDE1LjVTMTQuODggMTMgMTMuNSAxM1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMSAxM0gyM1YxNUgyMVYxM1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMSAxN0gyM1YxOUgyMVYxN1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="Toggle theme">
+            <span class="theme-icon">🌙</span>
+        </button>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">
+                    <span class="logo-icon">👥</span>
+                    SCIM 2.0 Dashboard
+                </h1>
+                <div class="auth-status" id="authStatus">
+                    <span class="status-indicator"></span>
+                    <span class="status-text">Not Connected</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Authentication Panel -->
+        <div class="card auth-card" id="authCard">
+            <div class="card-header">
+                <h2>🔐 Authentication</h2>
+                <p>Connect to your SCIM 2.0 endpoint</p>
+            </div>
+            <div class="card-body">
+                <form id="authForm" class="form">
+                    <div class="form-group">
+                        <label for="baseUrl">Base URL</label>
+                        <input type="url" id="baseUrl" value="http://localhost:8000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" value="admin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" value="admin123" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-icon">🔑</span>
+                        Connect
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard" id="dashboard" style="display: none;">
+            <!-- Tab Navigation -->
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="realms">🏢 Realms</button>
+                <button class="tab-btn" data-tab="users">👤 Users</button>
+                <button class="tab-btn" data-tab="bulk">📋 Bulk Import</button>
+                <button class="tab-btn" data-tab="admin">⚙️ Admin</button>
+            </nav>
+
+            <!-- Realms Tab -->
+            <div class="tab-content active" id="realms-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🏢 Realm Management</h3>
+                        <button class="btn btn-secondary" id="refreshRealms">
+                            <span class="btn-icon">🔄</span>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="selectedRealm">Select Realm</label>
+                            <select id="selectedRealm" class="form-select">
+                                <option value="">Loading realms...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="section">
+                            <h4>Create New Realm</h4>
+                            <form id="createRealmForm" class="form">
+                                <div class="form-group">
+                                    <label for="realmName">Realm Name</label>
+                                    <input type="text" id="realmName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="realmDescription">Description</label>
+                                    <textarea id="realmDescription" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-icon">➕</span>
+                                    Create Realm
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div class="tab-content" id="users-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>👤 User Management</h3>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" id="refreshUsers">
+                                <span class="btn-icon">🔄</span>
+                                Refresh
+                            </button>
+                            <button class="btn btn-primary" id="showCreateUser">
+                                <span class="btn-icon">➕</span>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- User Search -->
+                        <div class="search-section">
+                            <div class="form-group">
+                                <label>Search Users</label>
+                                <div class="search-controls">
+                                    <select id="searchType" class="form-select">
+                                        <option value="list">List All</option>
+                                        <option value="username">By Username</option>
+                                        <option value="email">By Email</option>
+                                        <option value="id">By User ID</option>
+                                    </select>
+                                    <input type="text" id="searchQuery" placeholder="Enter search term..." style="display: none;">
+                                    <button class="btn btn-secondary" id="searchUsers">
+                                        <span class="btn-icon">🔍</span>
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Users List -->
+                        <div class="users-list" id="usersList">
+                            <div class="empty-state">
+                                <span class="empty-icon">👥</span>
+                                <p>Select a realm to view users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create/Edit User Modal -->
+                <div class="modal" id="userModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="userModalTitle">Create New User</h3>
+                            <button class="modal-close" id="closeUserModal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="userForm" class="form">
+                                <div class="form-group">
+                                    <label for="userUserName">Username *</label>
+                                    <input type="text" id="userUserName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userFirstName">First Name *</label>
+                                    <input type="text" id="userFirstName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userSurName">Surname *</label>
+                                    <input type="text" id="userSurName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userDisplayName">Display Name</label>
+                                    <input type="text" id="userDisplayName">
+                                </div>
+                                <div class="form-group">
+                                    <label for="userExternalId">External ID</label>
+                                    <input type="text" id="userExternalId">
+                                </div>
+                                <div class="form-group">
+                                    <label for="userActive">Active Status</label>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="userActive" checked>
+                                        <label for="userActive" class="toggle-slider"></label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Addresses</label>
+                                    <div id="emailsList">
+                                        <div class="email-input">
+                                            <input type="email" placeholder="Email address" required>
+                                            <div class="toggle-switch">
+                                                <input type="checkbox" checked>
+                                                <label class="toggle-slider"></label>
+                                            </div>
+                                            <span class="primary-label">Primary</span>
+                                            <button type="button" class="btn-icon-small remove-email">🗑️</button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" id="addEmail">
+                                        <span class="btn-icon">➕</span>
+                                        Add Email
+                                    </button>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="cancelUser">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="btn-icon" id="userSubmitIcon">💾</span>
+                                        <span id="userSubmitText">Create User</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Import Tab -->
+            <div class="tab-content" id="bulk-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Bulk Import</h3>
+                        <button class="btn btn-secondary" id="downloadTemplate">
+                            <span class="btn-icon">📥</span>
+                            Download Template
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="section">
+                            <h4>Upload CSV File</h4>
+                            <div class="upload-area" id="uploadArea">
+                                <input type="file" id="csvFile" accept=".csv" style="display: none;">
+                                <div class="upload-content">
+                                    <span class="upload-icon">📁</span>
+                                    <p>Click to select CSV file or drag and drop</p>
+                                    <small>Supported format: CSV</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Import Options</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="dryRun" checked>
+                                    <label for="dryRun" class="toggle-slider"></label>
+                                </div>
+                                <span class="toggle-label">Dry Run (Validate only)</span>
+                            </div>
+                            <button class="btn btn-primary" id="performBulkImport" disabled>
+                                <span class="btn-icon">🚀</span>
+                                Import Users
+                            </button>
+                        </div>
+
+                        <div class="section">
+                            <h4>Import Results</h4>
+                            <div class="results-area" id="importResults">
+                                <div class="empty-state">
+                                    <span class="empty-icon">📊</span>
+                                    <p>Import results will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Tab -->
+            <div class="tab-content" id="admin-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>⚙️ Administration</h3>
+                        <button class="btn btn-secondary" id="healthCheck">
+                            <span class="btn-icon">🏥</span>
+                            Health Check
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="section">
+                            <h4>System Status</h4>
+                            <div class="status-grid" id="systemStatus">
+                                <div class="status-item">
+                                    <span class="status-label">API Status</span>
+                                    <span class="status-value" id="apiStatus">Unknown</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Database</span>
+                                    <span class="status-value" id="dbStatus">Unknown</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">Authentication</span>
+                                    <span class="status-value" id="authStatusValue">Unknown</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4>Create Admin User</h4>
+                            <form id="createAdminForm" class="form">
+                                <div class="form-group">
+                                    <label for="adminUsername">Username</label>
+                                    <input type="text" id="adminUsername" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminPassword">Password</label>
+                                    <input type="password" id="adminPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminEmail">Email</label>
+                                    <input type="email" id="adminEmail" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <span class="btn-icon">👤</span>
+                                    Create Admin
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loadingText">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
