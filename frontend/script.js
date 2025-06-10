@@ -848,9 +848,8 @@ class SCIMDashboard {
 
         // Enable import button
         document.getElementById('performBulkImport').disabled = false;
-    }
-
-    async downloadTemplate() {
+    }    async downloadTemplate() {
+        console.log('Download template called, currentRealm:', this.currentRealm);
         if (!this.currentRealm) {
             this.showToast('No Realm', 'Please select a realm first', 'warning');
             return;
@@ -859,7 +858,7 @@ class SCIMDashboard {
         this.showLoading('Downloading template...');
 
         try {
-            const response = await this.makeRequest(`/scim/v2/Realms/${this.currentRealm}/Users:bulk-template`);
+            const response = await this.makeRequest(`/scim/v2/Realms/${this.currentRealm}/Users/bulk-import/template`);
 
             if (response.ok) {
                 const blob = await response.blob();
@@ -881,9 +880,8 @@ class SCIMDashboard {
         } finally {
             this.hideLoading();
         }
-    }
-
-    async performBulkImport() {
+    }    async performBulkImport() {
+        console.log('Bulk import called, currentRealm:', this.currentRealm);
         if (!this.currentRealm) {
             this.showToast('No Realm', 'Please select a realm first', 'warning');
             return;
@@ -898,18 +896,23 @@ class SCIMDashboard {
         }
 
         const dryRun = document.getElementById('dryRun').checked;
-        this.showLoading(dryRun ? 'Validating CSV file...' : 'Importing users...');
-
-        try {
-            const endpoint = `/scim/v2/Realms/${this.currentRealm}/Users:bulk${dryRun ? '?dry_run=true' : ''}`;
+        this.showLoading(dryRun ? 'Validating CSV file...' : 'Importing users...');try {
+            const endpoint = `/scim/v2/Realms/${this.currentRealm}/Users/bulk-import`;
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('dry_run', dryRun.toString());
+            formData.append('skip_duplicates', 'true');
+            formData.append('continue_on_error', 'true');
             
             const response = await this.makeRequest(endpoint, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'text/csv',
                     'Authorization': `Basic ${this.credentials}`
+                    // Don't set Content-Type header - let the browser set it for FormData
                 },
-                body: file
+                body: formData
             });
 
             if (response.ok) {
