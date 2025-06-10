@@ -11,12 +11,15 @@ class SCIMDashboard {
         this.currentTheme = this.getSystemTheme();
         
         this.init();
-    }
-
-    init() {
+    }    init() {
         this.initializeTheme();
         this.bindEventListeners();
         this.loadAuthFromSession();
+        
+        // Load realms automatically if authenticated
+        if (this.credentials) {
+            this.loadRealms();
+        }
     }
 
     // Theme Management
@@ -30,12 +33,14 @@ class SCIMDashboard {
             this.currentTheme = savedTheme;
         }
         this.applyTheme();
-    }
-
-    applyTheme() {
+    }    applyTheme() {
         document.documentElement.setAttribute('data-theme', this.currentTheme);
-        const themeIcon = document.querySelector('.theme-icon');
-        themeIcon.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+        const themeToggle = document.getElementById('themeToggle');
+        
+        if (themeToggle) {
+            themeToggle.checked = this.currentTheme === 'dark';
+        }
+        
         sessionStorage.setItem('theme', this.currentTheme);
     }
 
@@ -49,9 +54,8 @@ class SCIMDashboard {
         // Bind admin form events
         document.getElementById('createAdminForm').addEventListener('submit', (e) => this.createAdmin(e));
         document.getElementById('changePasswordForm').addEventListener('submit', (e) => this.changePassword(e));
-        
-        // Theme toggle
-        document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+          // Theme toggle
+        document.getElementById('themeToggle').addEventListener('change', () => this.toggleTheme());
 
         // Authentication
         document.getElementById('authForm').addEventListener('submit', (e) => this.handleAuth(e));
@@ -59,12 +63,14 @@ class SCIMDashboard {
         // Tab navigation
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
-        });
-
-        // Realms
+        });        // Realms
         document.getElementById('refreshRealms').addEventListener('click', () => this.loadRealms());
         document.getElementById('createRealmForm').addEventListener('submit', (e) => this.createRealm(e));
         document.getElementById('selectedRealm').addEventListener('change', (e) => this.selectRealm(e.target.value));
+        
+        // Additional realm selectors
+        document.getElementById('usersRealmSelect').addEventListener('change', (e) => this.selectRealm(e.target.value));
+        document.getElementById('bulkRealmSelect').addEventListener('change', (e) => this.selectRealm(e.target.value));
 
         // Users
         document.getElementById('refreshUsers').addEventListener('click', () => this.loadUsers());
@@ -182,8 +188,7 @@ class SCIMDashboard {
             this.showToast('Connection Failed', 'Unable to connect. Please check your credentials.', 'error');
         } finally {
             this.hideLoading();
-        }
-    }
+        }    }
 
     connectToDashboard() {
         document.getElementById('authCard').style.display = 'none';
@@ -195,9 +200,8 @@ class SCIMDashboard {
         statusIndicator.classList.add('connected');
         statusText.textContent = 'Connected';
         
-        // Load initial data
+        // Load realms automatically after connecting
         this.loadRealms();
-        this.performHealthCheck();
     }
 
     // HTTP Requests
@@ -299,29 +303,86 @@ class SCIMDashboard {
         } finally {
             this.hideLoading();
         }
-    }
-
-    populateRealmsDropdown(realms) {
-        const select = document.getElementById('selectedRealm');
-        select.innerHTML = '<option value="">Select a realm...</option>';
+    }    populateRealmsDropdown(realms) {
+        // Get all realm dropdown selectors
+        const realmSelectors = [
+            'selectedRealm',
+            'usersRealmSelect', 
+            'bulkRealmSelect'
+        ];
         
-        realms.forEach(realm => {
-            const option = document.createElement('option');
-            option.value = realm.realm_id;
-            option.textContent = `${realm.name} (${realm.realm_id})`;
-            select.appendChild(option);
+        realmSelectors.forEach(selectorId => {
+            const select = document.getElementById(selectorId);
+            if (select) {
+                select.innerHTML = '<option value="">Select a realm...</option>';
+                
+                realms.forEach(realm => {
+                    const option = document.createElement('option');
+                    option.value = realm.realm_id;
+                    option.textContent = `${realm.name} (${realm.realm_id})`;
+                    select.appendChild(option);
+                });
+            }
         });
+
+        // Populate realms list in Realms tab
+        this.displayRealmsList(realms);
 
         // Auto-select first realm if only one exists
         if (realms.length === 1) {
-            select.value = realms[0].realm_id;
-            this.selectRealm(realms[0].realm_id);
+            const firstRealmId = realms[0].realm_id;
+            realmSelectors.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                if (select) {
+                    select.value = firstRealmId;
+                }
+            });
+            this.selectRealm(firstRealmId);
         }
     }
 
-    selectRealm(realmId) {
+    displayRealmsList(realms) {
+        const realmsList = document.getElementById('realmsList');
+        if (!realmsList) return;
+
+        if (realms.length === 0) {
+            realmsList.innerHTML = '<p class="text-muted">No realms available. Create one below.</p>';
+            return;
+        }
+
+        realmsList.innerHTML = realms.map(realm => `
+            <div class="realm-item">
+                <div class="realm-info">
+                    <h5>${realm.name}</h5>
+                    <p><strong>ID:</strong> <code>${realm.realm_id}</code></p>
+                    <p><strong>Description:</strong> ${realm.description || 'No description'}</p>
+                    <p><strong>Created:</strong> ${new Date(realm.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="realm-actions">
+                    <button class="btn btn-sm btn-primary" onclick="dashboard.selectRealm('${realm.realm_id}')">
+                        <span class="btn-icon">✓</span>
+                        Select
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }selectRealm(realmId) {
         this.currentRealm = realmId;
         this.saveToSession('selected_realm', realmId);
+        
+        // Synchronize all realm dropdowns
+        const realmSelectors = [
+            'selectedRealm',
+            'usersRealmSelect', 
+            'bulkRealmSelect'
+        ];
+        
+        realmSelectors.forEach(selectorId => {
+            const select = document.getElementById(selectorId);
+            if (select && select.value !== realmId) {
+                select.value = realmId;
+            }
+        });
         
         if (realmId) {
             this.loadUsers();

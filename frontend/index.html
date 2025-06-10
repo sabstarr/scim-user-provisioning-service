@@ -7,25 +7,26 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzdCMjQxQyIvPgo8cGF0aCBkPSJNOSAxNkg5LjVIMTBWMTZIOUM5IDEzLjUgMTEgMTEgMTMuNSAxMUMxNiAxMSAxOCAxMy41IDE4IDE2UzE2IDIxIDEzLjUgMjFDMTEgMjEgOSAxOC41IDkgMTZaTTEzLjUgMTNDMTIuMTIgMTMgMTEgMTQuMTIgMTEgMTUuNUMxMSAxNi44OCAxMi4xMiAxOCAxMy41IDE4UzE2IDE2Ljg4IDE2IDE1LjVTMTQuODggMTMgMTMuNSAxM1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMSAxM0gyM1YxNUgyMVYxM1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMSAxN0gyM1YxOUgyMVYxN1oiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
 </head>
-<body>
-    <!-- Theme Toggle -->
-    <div class="theme-toggle">
-        <button id="themeToggle" class="theme-btn" title="Toggle theme">
-            <span class="theme-icon">🌙</span>
-        </button>
-    </div>
-
-    <!-- Navigation Header -->
+<body>    <!-- Navigation Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <h1 class="logo">
                     <span class="logo-icon">👥</span>
                     SCIM 2.0 Dashboard
-                </h1>
-                <div class="auth-status" id="authStatus">
-                    <span class="status-indicator"></span>
-                    <span class="status-text">Not Connected</span>
+                </h1>                <div class="header-right">
+                    <div class="theme-toggle-inline">
+                        <span class="theme-label">Light</span>
+                        <label class="theme-switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="theme-label">Dark</span>
+                    </div>
+                    <div class="auth-status" id="authStatus">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">Not Connected</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -62,12 +63,11 @@
         </div>
 
         <!-- Main Dashboard -->
-        <div class="dashboard" id="dashboard" style="display: none;">
-            <!-- Tab Navigation -->
-            <nav class="tab-nav">
-                <button class="tab-btn active" data-tab="realms">🏢 Realms</button>
-                <button class="tab-btn" data-tab="users">👤 Users</button>
+        <div class="dashboard" id="dashboard" style="display: none;">            <!-- Tab Navigation -->
+            <nav class="tab-nav">                <button class="tab-btn active" data-tab="realms">🏢 Realms</button>
+                <button class="tab-btn" data-tab="users">👤 User Provisioning</button>
                 <button class="tab-btn" data-tab="bulk">📋 Bulk Import</button>
+                <button class="tab-btn" data-tab="schema">📄 User Schema</button>
                 <button class="tab-btn" data-tab="admin">⚙️ Admin</button>
             </nav>
 
@@ -80,13 +80,19 @@
                             <span class="btn-icon">🔄</span>
                             Refresh
                         </button>
-                    </div>
-                    <div class="card-body">
+                    </div>                    <div class="card-body">
                         <div class="form-group">
                             <label for="selectedRealm">Select Realm</label>
                             <select id="selectedRealm" class="form-select">
                                 <option value="">Loading realms...</option>
                             </select>
+                        </div>
+                        
+                        <div class="section">
+                            <h4>Available Realms</h4>
+                            <div id="realmsList" class="realms-list">
+                                <p class="text-muted">Loading realms...</p>
+                            </div>
                         </div>
                         
                         <div class="section">
@@ -114,8 +120,14 @@
             <div class="tab-content" id="users-tab">
                 <div class="card">
                     <div class="card-header">
-                        <h3>👤 User Management</h3>
+                        <h3>👤 User Provisioning</h3>
                         <div class="header-actions">
+                            <div class="realm-selector">
+                                <label for="usersRealmSelect">Realm:</label>
+                                <select id="usersRealmSelect" class="form-select">
+                                    <option value="">Select a realm...</option>
+                                </select>
+                            </div>
                             <button class="btn btn-secondary" id="refreshUsers">
                                 <span class="btn-icon">🔄</span>
                                 Refresh
@@ -125,8 +137,7 @@
                                 Add User
                             </button>
                         </div>
-                    </div>
-                    <div class="card-body">
+                    </div>                    <div class="card-body">
                         <!-- User Search -->
                         <div class="search-section">
                             <div class="form-group">
@@ -222,17 +233,23 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Bulk Import Tab -->
+            </div>            <!-- Bulk Import Tab -->
             <div class="tab-content" id="bulk-tab">
                 <div class="card">
                     <div class="card-header">
                         <h3>📋 Bulk Import</h3>
-                        <button class="btn btn-secondary" id="downloadTemplate">
-                            <span class="btn-icon">📥</span>
-                            Download Template
-                        </button>
+                        <div class="header-actions">
+                            <div class="realm-selector">
+                                <label for="bulkRealmSelect">Realm:</label>
+                                <select id="bulkRealmSelect" class="form-select">
+                                    <option value="">Select a realm...</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-secondary" id="downloadTemplate">
+                                <span class="btn-icon">📥</span>
+                                Download Template
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="section">
@@ -337,12 +354,156 @@
                                 <div class="form-group">
                                     <label for="confirmPassword">Confirm New Password</label>
                                     <input type="password" id="confirmPassword" minlength="8" required>
-                                </div>
-                                <button type="submit" class="btn btn-warning">
+                                </div>                                <button type="submit" class="btn btn-warning">
                                     <span class="btn-icon">🔑</span>
                                     Change Password
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Schema Tab -->
+            <div class="tab-content" id="schema-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📄 SCIM 2.0 User Schema</h3>
+                        <p>Complete schema specification for SCIM user objects</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="section">
+                            <h4>Core Schema</h4>
+                            <div class="schema-info">
+                                <p><strong>Schema URI:</strong> <code>urn:ietf:params:scim:schemas:core:2.0:User</code></p>
+                                <p><strong>Resource Type:</strong> User</p>
+                                <p><strong>Specification:</strong> RFC 7643 - SCIM Core Schema</p>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4>Required Attributes</h4>
+                            <div class="schema-table">
+                                <div class="schema-row schema-header">
+                                    <div class="schema-cell">Attribute</div>
+                                    <div class="schema-cell">Type</div>
+                                    <div class="schema-cell">Description</div>
+                                    <div class="schema-cell">Example</div>
+                                </div>                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>schemas</code></div>
+                                    <div class="schema-cell" data-label="Type">Array[String]</div>
+                                    <div class="schema-cell" data-label="Description">SCIM schema URIs</div>
+                                    <div class="schema-cell" data-label="Example"><code>["urn:ietf:params:scim:schemas:core:2.0:User"]</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>userName</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">Unique identifier for the user</div>
+                                    <div class="schema-cell" data-label="Example"><code>"jdoe"</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>firstName</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">User's first name</div>
+                                    <div class="schema-cell" data-label="Example"><code>"John"</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>surName</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">User's last name</div>
+                                    <div class="schema-cell" data-label="Example"><code>"Doe"</code></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4>Optional Attributes</h4>
+                            <div class="schema-table">
+                                <div class="schema-row schema-header">
+                                    <div class="schema-cell">Attribute</div>
+                                    <div class="schema-cell">Type</div>
+                                    <div class="schema-cell">Description</div>
+                                    <div class="schema-cell">Example</div>
+                                </div>                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>displayName</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">User's display name</div>
+                                    <div class="schema-cell" data-label="Example"><code>"John Doe"</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>externalId</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">External system identifier</div>
+                                    <div class="schema-cell" data-label="Example"><code>"ext123456"</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>active</code></div>
+                                    <div class="schema-cell" data-label="Type">Boolean</div>
+                                    <div class="schema-cell" data-label="Description">User account status</div>
+                                    <div class="schema-cell" data-label="Example"><code>true</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>emails</code></div>
+                                    <div class="schema-cell" data-label="Type">Array[Object]</div>
+                                    <div class="schema-cell" data-label="Description">Email addresses with primary flag</div>
+                                    <div class="schema-cell" data-label="Example"><code>[{"value": "john@example.com", "primary": true}]</code></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4>System Attributes</h4>
+                            <div class="schema-table">
+                                <div class="schema-row schema-header">
+                                    <div class="schema-cell">Attribute</div>
+                                    <div class="schema-cell">Type</div>
+                                    <div class="schema-cell">Description</div>
+                                    <div class="schema-cell">Example</div>
+                                </div>                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>id</code></div>
+                                    <div class="schema-cell" data-label="Type">String</div>
+                                    <div class="schema-cell" data-label="Description">Unique resource identifier (UUID)</div>
+                                    <div class="schema-cell" data-label="Example"><code>"c40157f5-7405-421b-8a72-6171de4a524b"</code></div>
+                                </div>
+                                <div class="schema-row">
+                                    <div class="schema-cell" data-label="Attribute"><code>meta</code></div>
+                                    <div class="schema-cell" data-label="Type">Object</div>
+                                    <div class="schema-cell" data-label="Description">Resource metadata</div>
+                                    <div class="schema-cell" data-label="Example"><code>{"resourceType": "User", "created": "2025-06-10T..."}</code></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h4>Complete Example</h4>
+                            <div class="schema-example">
+                                <h5>SCIM User JSON</h5>
+                                <pre><code>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+  "id": "c40157f5-7405-421b-8a72-6171de4a524b",
+  "userName": "jdoe",
+  "firstName": "John",
+  "surName": "Doe",
+  "displayName": "John Doe",
+  "externalId": "emp123456",
+  "active": true,
+  "emails": [
+    {
+      "value": "john.doe@example.com",
+      "primary": true
+    },
+    {
+      "value": "j.doe@personal.com",
+      "primary": false
+    }
+  ],
+  "meta": {
+    "resourceType": "User",
+    "created": "2025-06-10T14:30:00Z",
+    "lastModified": "2025-06-10T14:30:00Z",
+    "location": "/scim/v2/Realms/realm_abc123/Users/c40157f5-7405-421b-8a72-6171de4a524b"
+  }
+}</code></pre>                            </div>
                         </div>
                     </div>
                 </div>
