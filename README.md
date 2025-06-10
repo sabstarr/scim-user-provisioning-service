@@ -6,14 +6,17 @@ A comprehensive SCIM 2.0 compliant API implementation using FastAPI, SQLAlchemy,
 
 - **SCIM 2.0 Compliance**: Full implementation of SCIM 2.0 core schema for users
 - **Multi-Realm Support**: Isolated user provisioning across different realms/tenants
-- **Modern Web Frontend**: Beautiful, responsive single-page application with light/dark themes
-- **Bulk CSV Import**: Testing-grade bulk user provisioning with validation and error reporting
-- **PowerShell Automation**: Scripted workflow for automated bulk imports
-- **Secure Authentication**: HTTP Basic Authentication with bcrypt password hashing
+- **Modern Web Frontend**: Professional single-page application with comprehensive CRUD operations
+- **Theme Support**: Light/dark themes with professional toggle switch and system preference detection
+- **Complete User Management**: Full Create, Read, Update, Delete operations with advanced search
+- **Bulk CSV Import**: Enterprise-grade bulk user provisioning with validation and error reporting
+- **Schema Documentation**: Complete SCIM 2.0 user schema reference built into the interface
+- **Secure Authentication**: HTTP Basic Authentication with comprehensive session management
 - **RESTful API**: FastAPI-based endpoints with automatic OpenAPI documentation
 - **Database Security**: SQLAlchemy ORM preventing SQL injection attacks
 - **Comprehensive Logging**: Structured logging throughout the application
 - **Type Safety**: Full type hints following PEP 8 conventions
+- **Mobile Responsive**: Touch-optimized interface that works on all devices
 
 ## 📁 Project Structure
 
@@ -39,7 +42,6 @@ scim-endpoints-project/
 │   │       ├── __init__.py         # Endpoints module initialization
 │   │       ├── scim_endpoints.py   # SCIM 2.0 user endpoints
 │   │       └── admin_endpoints.py  # Administrative endpoints
-├── bulk_import_workflow.ps1       # PowerShell automation script
 ├── sample_users_import.csv        # Sample CSV files for testing
 ├── sample_minimal_import.csv       # Minimal format sample
 ├── sample_small_import.csv         # Mixed status sample
@@ -397,15 +399,17 @@ The API uses HTTP Basic Authentication. Default credentials:
 
 4. **Start Managing Users**
    - **Realms Tab**: View and create realms
-   - **Users Tab**: Search, create, edit, and delete users
+   - **Users Tab**: Search, create, edit, and delete users  
    - **Bulk Import Tab**: Upload CSV files for bulk user creation
+   - **User Schema Tab**: View complete SCIM 2.0 user schema documentation
    - **Admin Tab**: Monitor system health and create admin users
 
 ### Frontend Features Walkthrough
-- **🎨 Theme Toggle**: Click the moon/sun icon in the top-right to switch between light and dark themes
+- **🎨 Theme Toggle**: Click the toggle switch in the top-right to switch between light and dark themes
 - **🏢 Realm Selection**: Select a realm from the dropdown before managing users
 - **👤 User Search**: Search by username, email, ID, or list all users
 - **📋 CSV Import**: Download templates and upload CSV files with drag-and-drop
+- **📄 User Schema**: Complete SCIM 2.0 user schema documentation and reference
 - **⚙️ Health Monitoring**: Check system status and create additional admin users
 
 ## 📖 API Documentation
