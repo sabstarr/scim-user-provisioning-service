@@ -263,6 +263,7 @@ curl -u admin:admin123 -X POST \
 - `POST /scim/v2/Realms/{realm_id}/Users:bulk` - Bulk import users from CSV
 - `GET /scim/v2/Realms/{realm_id}/Users:bulk-info` - Get CSV format requirements
 - `GET /scim/v2/Realms/{realm_id}/Users:bulk-template` - Download CSV template
+#### The realm_id should be available for all realms from a dropdown list for selection prior to uploading the csv
 
 ### Administrative Endpoints
 
