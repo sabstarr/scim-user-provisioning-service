@@ -1,18 +1,18 @@
 /* CSS Custom Properties for Theming */
 :root {
   /* Light Theme Colors */
-  --primary-color: #7b241c;
-  --secondary-color: #21618c;
+  --primary-color: #df952d;
+  --secondary-color: #8ae18a;
   --success-color: #28a745;
   --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
+  --warning-color: #8a5510;
+  --info-color: #082226;
   
   /* Background Colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-tertiary: #e9ecef;
-  --bg-accent: rgba(123, 36, 28, 0.1);
+  --bg-accent: rgba(199, 93, 83, 0.1);
   
   /* Text Colors */
   --text-primary: #000000;
